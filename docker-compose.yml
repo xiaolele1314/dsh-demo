@@ -1,0 +1,22 @@
+services:
+  supervisor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - agent-data:/data/agents
+    environment:
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=50051
+      - DSH_IMAGE=digital-human-agent:latest
+      - MAX_CONTAINERS=50
+      - CONTAINER_MEMORY=512m
+      - CONTAINER_CPU=1
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+    restart: unless-stopped
+
+volumes:
+  agent-data:
