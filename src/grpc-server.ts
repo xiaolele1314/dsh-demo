@@ -2,48 +2,38 @@ import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { DockerProcessPool } from './docker-pool.js';
+import type { DockerManager } from './docker-manager.js';
 import type { AgentBlueprint } from './types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROTO_PATH = join(__dirname, '..', 'proto', 'agent_runtime.proto');
 
 const packageDef = protoLoader.loadSync(PROTO_PATH, {
-  keepCase: false,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true,
+  keepCase: false, longs: String, enums: String, defaults: true, oneofs: true,
 });
 const proto = grpc.loadPackageDefinition(packageDef) as any;
 
 export class GrpcServer {
   private server: grpc.Server;
-  private pool: DockerProcessPool;
 
-  constructor(pool: DockerProcessPool) {
-    this.pool = pool;
+  constructor(private manager: DockerManager) {
     this.server = new grpc.Server();
     this.server.addService(proto.dsh.cloud.v1.AgentRuntime.service, {
-      createAgent: this.createAgent.bind(this),
-      stopAgent: this.stopAgent.bind(this),
-      destroyAgent: this.destroyAgent.bind(this),
-      getAgentStatus: this.getAgentStatus.bind(this),
-      sendMessage: this.sendMessage.bind(this),
+      createAgent: this.handleCreate.bind(this),
+      stopAgent: this.handleStop.bind(this),
+      destroyAgent: this.handleDestroy.bind(this),
+      getAgentStatus: this.handleStatus.bind(this),
+      sendMessage: this.handleSendMessage.bind(this),
     });
   }
 
-  async listen(host: string, port: number): Promise<void> {
+  listen(host: string, port: number): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.server.bindAsync(
-        `${host}:${port}`,
-        grpc.ServerCredentials.createInsecure(),
-        (err) => {
-          if (err) return reject(err);
-          console.log(`gRPC server listening on ${host}:${port}`);
-          resolve();
-        },
-      );
+      this.server.bindAsync(`${host}:${port}`, grpc.ServerCredentials.createInsecure(), (err) => {
+        if (err) return reject(err);
+        console.log(`gRPC listening on ${host}:${port}`);
+        resolve();
+      });
     });
   }
 
@@ -51,58 +41,52 @@ export class GrpcServer {
     this.server.forceShutdown();
   }
 
-  private async createAgent(call: any, callback: any): Promise<void> {
+  private async handleCreate(call: any, cb: any): Promise<void> {
     const { tenantId, agentId, blueprint } = call.request;
     try {
-      await this.pool.create(tenantId, agentId, blueprint as AgentBlueprint);
-      callback(null, { success: true, errorMessage: '' });
+      await this.manager.create(tenantId, agentId, blueprint as AgentBlueprint);
+      cb(null, { success: true, errorMessage: '' });
     } catch (err: any) {
       console.error('CreateAgent error:', err.message);
-      callback(null, { success: false, errorMessage: err.message });
+      cb(null, { success: false, errorMessage: err.message });
     }
   }
 
-  private async stopAgent(call: any, callback: any): Promise<void> {
-    const { tenantId, agentId } = call.request;
+  private async handleStop(call: any, cb: any): Promise<void> {
     try {
-      await this.pool.stop(tenantId, agentId);
-      callback(null, { success: true, errorMessage: '' });
+      await this.manager.stop(call.request.tenantId, call.request.agentId);
+      cb(null, { success: true, errorMessage: '' });
     } catch (err: any) {
-      callback(null, { success: false, errorMessage: err.message });
+      cb(null, { success: false, errorMessage: err.message });
     }
   }
 
-  private async destroyAgent(call: any, callback: any): Promise<void> {
-    const { tenantId, agentId } = call.request;
+  private async handleDestroy(call: any, cb: any): Promise<void> {
     try {
-      await this.pool.destroy(tenantId, agentId);
-      callback(null, { success: true });
-    } catch {
-      callback(null, { success: true });
-    }
+      await this.manager.destroy(call.request.tenantId, call.request.agentId);
+    } catch { /* */ }
+    cb(null, { success: true });
   }
 
-  private getAgentStatus(call: any, callback: any): void {
-    const { tenantId, agentId } = call.request;
-    const info = this.pool.getStatus(tenantId, agentId);
-    callback(null, info);
+  private handleStatus(call: any, cb: any): void {
+    cb(null, this.manager.getStatus(call.request.tenantId, call.request.agentId));
   }
 
-  private async sendMessage(call: any): Promise<void> {
+  private async handleSendMessage(call: any): Promise<void> {
     const { tenantId, agentId, sessionId, message } = call.request;
     try {
-      const stream = this.pool.sendMessage(tenantId, agentId, sessionId, message);
-      for await (const chunk of stream) {
+      for await (const chunk of this.manager.sendMessage(tenantId, agentId, sessionId, message)) {
         if (call.cancelled) break;
-        call.write(chunk);
+        const out: any = { sessionId: chunk.sessionId };
+        if (chunk.textDelta !== undefined) out.textDelta = chunk.textDelta;
+        if (chunk.toolCall) out.toolCall = chunk.toolCall;
+        if (chunk.finished) out.finished = chunk.finished;
+        if (chunk.error) out.error = chunk.error;
+        call.write(out);
       }
-      call.end();
     } catch (err: any) {
-      call.write({
-        sessionId,
-        error: { code: 'INTERNAL', message: err.message },
-      });
-      call.end();
+      call.write({ sessionId, error: { code: 'INTERNAL', message: err.message } });
     }
+    call.end();
   }
 }

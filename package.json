@@ -5,8 +5,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "dev": "tsx src/main.ts",
-    "proto:gen": "proto-loader-gen-types --grpcLib=@grpc/grpc-js --outDir=src/generated proto/agent_runtime.proto"
+    "dev": "tsx src/main.ts"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.12.0",

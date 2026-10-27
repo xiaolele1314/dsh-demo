@@ -1,8 +1,10 @@
+import { type ChatChunkOut } from './stdio-bridge.js';
 import type { AgentBlueprint, RuntimeConfig } from './types.js';
-export declare class DockerProcessPool {
+export declare class DockerManager {
     private config;
     private docker;
-    private containers;
+    private agents;
+    private translator;
     constructor(config: RuntimeConfig);
     private key;
     create(tenantId: string, agentId: string, blueprint: AgentBlueprint): Promise<void>;
@@ -14,7 +16,7 @@ export declare class DockerProcessPool {
         memoryUsageMb: number;
         uptimeSeconds: string;
     };
-    sendMessage(tenantId: string, agentId: string, sessionId: string, message: string): AsyncGenerator<any>;
+    sendMessage(tenantId: string, agentId: string, sessionId: string, message: string): AsyncGenerator<ChatChunkOut>;
     destroyAll(): Promise<void>;
-    private parseMemoryLimit;
+    private parseMemory;
 }

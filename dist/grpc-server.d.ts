@@ -1,13 +1,13 @@
-import { DockerProcessPool } from './docker-pool.js';
+import type { DockerManager } from './docker-manager.js';
 export declare class GrpcServer {
+    private manager;
     private server;
-    private pool;
-    constructor(pool: DockerProcessPool);
+    constructor(manager: DockerManager);
     listen(host: string, port: number): Promise<void>;
     shutdown(): void;
-    private createAgent;
-    private stopAgent;
-    private destroyAgent;
-    private getAgentStatus;
-    private sendMessage;
+    private handleCreate;
+    private handleStop;
+    private handleDestroy;
+    private handleStatus;
+    private handleSendMessage;
 }

@@ -15,36 +15,29 @@ message CreateAgentRequest {
   string agent_id = 2;
   AgentBlueprint blueprint = 3;
 }
-
 message CreateAgentResponse {
   bool success = 1;
   string error_message = 2;
 }
-
 message StopAgentRequest {
   string tenant_id = 1;
   string agent_id = 2;
 }
-
 message StopAgentResponse {
   bool success = 1;
   string error_message = 2;
 }
-
 message DestroyAgentRequest {
   string tenant_id = 1;
   string agent_id = 2;
 }
-
 message DestroyAgentResponse {
   bool success = 1;
 }
-
 message GetAgentStatusRequest {
   string tenant_id = 1;
   string agent_id = 2;
 }
-
 message AgentStatusResponse {
   string status = 1;
   int32 active_sessions = 2;
@@ -62,13 +55,11 @@ message AgentBlueprint {
   repeated McpBinding mcp_bindings = 7;
   map<string, string> credential_refs = 8;
 }
-
 message SkillBinding {
   string skill_id = 1;
   string name = 2;
   string content = 3;
 }
-
 message McpBinding {
   string mcp_id = 1;
   string name = 2;
@@ -84,7 +75,6 @@ message SendMessageRequest {
   string session_id = 3;
   string message = 4;
 }
-
 message ChatChunk {
   string session_id = 1;
   oneof payload {
@@ -94,20 +84,17 @@ message ChatChunk {
     ChatError error = 5;
   }
 }
-
 message ToolCallEvent {
   string tool_name = 1;
   string arguments_json = 2;
   string result_json = 3;
 }
-
 message ChatFinished {
   string full_content = 1;
   int32 prompt_tokens = 2;
   int32 completion_tokens = 3;
   string stop_reason = 4;
 }
-
 message ChatError {
   string code = 1;
   string message = 2;

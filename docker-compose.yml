@@ -1,8 +1,6 @@
 services:
   supervisor:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - "50051:50051"
     volumes:
@@ -11,7 +9,8 @@ services:
     environment:
       - GRPC_HOST=0.0.0.0
       - GRPC_PORT=50051
-      - DSH_IMAGE=digital-human-agent:latest
+      - DATA_ROOT=/data/agents
+      - DSH_IMAGE=dsh-agent:latest
       - MAX_CONTAINERS=50
       - CONTAINER_MEMORY=512m
       - CONTAINER_CPU=1

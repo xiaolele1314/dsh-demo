@@ -24,12 +24,18 @@ export interface McpBinding {
   url: string;
 }
 
-export interface AgentContainer {
+export interface AgentEntry {
   tenantId: string;
   agentId: string;
   containerId: string;
   startedAt: number;
-  blueprint: AgentBlueprint;
+  stdioBridge: StdioBridgeHandle | null;
+}
+
+export interface StdioBridgeHandle {
+  send(method: string, params: Record<string, unknown>, id?: number): void;
+  onLine(handler: (line: string) => void): void;
+  close(): void;
 }
 
 export interface RuntimeConfig {
@@ -38,7 +44,7 @@ export interface RuntimeConfig {
   dataRoot: string;
   dshImage: string;
   maxContainers: number;
-  containerMemoryLimit: string;
-  containerCpuLimit: number;
+  containerMemory: string;
+  containerCpu: number;
   deepseekApiKey: string;
 }
