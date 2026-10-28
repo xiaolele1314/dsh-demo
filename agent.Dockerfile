@@ -1,10 +1,10 @@
 FROM node:22-slim AS builder
 WORKDIR /build
 RUN apt-get update && apt-get install -y git python3 make g++ && \
-    npm install -g pnpm@11
+    npm install -g pnpm@10
 # 构建时传入 deepseek-harness 源码
 COPY . .
-RUN echo "ignore-build-scripts=false" > .npmrc && pnpm install --no-frozen-lockfile && pnpm build
+RUN pnpm install --no-frozen-lockfile && pnpm build
 
 FROM node:22-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
