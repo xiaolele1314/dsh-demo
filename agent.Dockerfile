@@ -4,8 +4,7 @@ RUN apt-get update && apt-get install -y git python3 make g++ && \
     npm install -g pnpm@11
 # 构建时传入 deepseek-harness 源码
 COPY . .
-ENV PNPM_ALLOW_BUILD_SCRIPTS=true
-RUN pnpm install --no-frozen-lockfile && pnpm build
+RUN echo "ignore-build-scripts=false" > .npmrc && pnpm install --no-frozen-lockfile && pnpm build
 
 FROM node:22-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
