@@ -46,5 +46,7 @@ export interface RuntimeConfig {
   maxContainers: number;
   containerMemory: string;
   containerCpu: number;
-  deepseekApiKey: string;
+  llmApiKey: string;
+  llmApiBase: string;
+  llmDefaultModel: string;
 }

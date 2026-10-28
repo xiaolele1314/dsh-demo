@@ -9,7 +9,7 @@ export class DockerManager {
     constructor(config) {
         this.config = config;
         this.docker = new Docker({ socketPath: '/var/run/docker.sock' });
-        this.translator = new BlueprintTranslator(config.dataRoot);
+        this.translator = new BlueprintTranslator(config.dataRoot, config.llmApiBase, config.llmDefaultModel);
     }
     key(tenantId, agentId) {
         return `${tenantId}:${agentId}`;
@@ -26,7 +26,8 @@ export class DockerManager {
         const configDir = await this.translator.translate(tenantId, agentId, blueprint);
         // 2. 构建环境变量
         const env = [
-            `DEEPSEEK_API_KEY=${this.config.deepseekApiKey}`,
+            `OPENAI_API_KEY=${this.config.llmApiKey}`,
+            `OPENAI_BASE_URL=${this.config.llmApiBase}`,
             `DSH_TENANT_ID=${tenantId}`,
             `DSH_AGENT_ID=${agentId}`,
         ];

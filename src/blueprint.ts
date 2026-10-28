@@ -4,7 +4,11 @@ import { stringify as toYaml } from 'yaml';
 import type { AgentBlueprint, SkillBinding } from './types.js';
 
 export class BlueprintTranslator {
-  constructor(private dataRoot: string) {}
+  constructor(
+    private dataRoot: string,
+    private defaultApiBase: string,
+    private defaultModel: string,
+  ) {}
 
   async translate(tenantId: string, agentId: string, bp: AgentBlueprint): Promise<string> {
     const dir = join(this.dataRoot, tenantId, agentId);
@@ -16,11 +20,11 @@ export class BlueprintTranslator {
       agents: [{ id: agentId, maxParallelToolCalls: 4 }],
     };
 
-    if (bp.provider === 'deepseek') {
-      plugins['@deepseek-ai/dsh-llm-deepseek-api-key'] = {};
-    } else {
-      plugins['@deepseek-ai/dsh-llm-pi-ai'] = bp.apiBase ? { baseURL: bp.apiBase } : {};
-    }
+    // 统一使用 OpenAI 兼容适配器，指向 aihub 模型服务
+    const apiBase = bp.apiBase || this.defaultApiBase;
+    plugins['@deepseek-ai/dsh-llm-pi-ai'] = {
+      baseURL: apiBase,
+    };
 
     plugins['@deepseek-ai/dsh-system-prompt'] = {
       personaPrefix: buildSystemPrompt(bp.systemPrompt, bp.skillBindings),

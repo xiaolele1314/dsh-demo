@@ -10,12 +10,14 @@ const config: RuntimeConfig = {
   maxContainers: parseInt(process.env.MAX_CONTAINERS || '50'),
   containerMemory: process.env.CONTAINER_MEMORY || '512m',
   containerCpu: parseFloat(process.env.CONTAINER_CPU || '1'),
-  deepseekApiKey: process.env.DEEPSEEK_API_KEY || '',
+  llmApiKey: process.env.LLM_API_KEY || '',
+  llmApiBase: process.env.LLM_API_BASE || 'https://aihub.juxieyun.com/aihub-api/v1',
+  llmDefaultModel: process.env.LLM_DEFAULT_MODEL || 'deepseek-v4-flash-0731',
 };
 
 async function main() {
-  if (!config.deepseekApiKey) {
-    console.error('ERROR: DEEPSEEK_API_KEY is required');
+  if (!config.llmApiKey) {
+    console.error('ERROR: LLM_API_KEY is required');
     process.exit(1);
   }
 
@@ -26,8 +28,9 @@ async function main() {
 
   console.log('Runtime Supervisor started');
   console.log(`  Image: ${config.dshImage}`);
+  console.log(`  LLM API: ${config.llmApiBase}`);
+  console.log(`  Default model: ${config.llmDefaultModel}`);
   console.log(`  Max containers: ${config.maxContainers}`);
-  console.log(`  Memory/container: ${config.containerMemory}`);
 
   const shutdown = async () => {
     console.log('Shutting down...');

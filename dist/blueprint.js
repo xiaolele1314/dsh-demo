@@ -3,8 +3,12 @@ import { join } from 'node:path';
 import { stringify as toYaml } from 'yaml';
 export class BlueprintTranslator {
     dataRoot;
-    constructor(dataRoot) {
+    defaultApiBase;
+    defaultModel;
+    constructor(dataRoot, defaultApiBase, defaultModel) {
         this.dataRoot = dataRoot;
+        this.defaultApiBase = defaultApiBase;
+        this.defaultModel = defaultModel;
     }
     async translate(tenantId, agentId, bp) {
         const dir = join(this.dataRoot, tenantId, agentId);
@@ -13,12 +17,11 @@ export class BlueprintTranslator {
         plugins['@deepseek-ai/dsh-agent-loop'] = {
             agents: [{ id: agentId, maxParallelToolCalls: 4 }],
         };
-        if (bp.provider === 'deepseek') {
-            plugins['@deepseek-ai/dsh-llm-deepseek-api-key'] = {};
-        }
-        else {
-            plugins['@deepseek-ai/dsh-llm-pi-ai'] = bp.apiBase ? { baseURL: bp.apiBase } : {};
-        }
+        // 统一使用 OpenAI 兼容适配器，指向 aihub 模型服务
+        const apiBase = bp.apiBase || this.defaultApiBase;
+        plugins['@deepseek-ai/dsh-llm-pi-ai'] = {
+            baseURL: apiBase,
+        };
         plugins['@deepseek-ai/dsh-system-prompt'] = {
             personaPrefix: buildSystemPrompt(bp.systemPrompt, bp.skillBindings),
         };
