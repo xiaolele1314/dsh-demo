@@ -1,0 +1,93 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1793159882683,
+  "projectRoot": "D:\\gtihub\\digital-human-runtime",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": "npm run dev",
+    "scripts": {
+      "build": "tsc",
+      "start": "node dist/main.js",
+      "dev": "tsx src/main.ts"
+    }
+  },
+  "conventions": {
+    "namingStyle": "camelCase/PascalCase",
+    "importStyle": "ES modules",
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "src"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "dist": {
+      "path": "dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 12,
+      "lastAccessed": 1793159882585,
+      "keyFiles": [
+        "blueprint.d.ts",
+        "blueprint.js",
+        "docker-manager.d.ts",
+        "docker-manager.js",
+        "grpc-server.d.ts"
+      ]
+    },
+    "proto": {
+      "path": "proto",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1793159882621,
+      "keyFiles": [
+        "agent_runtime.proto"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 6,
+      "lastAccessed": 1793159882621,
+      "keyFiles": [
+        "blueprint.ts",
+        "docker-manager.ts",
+        "grpc-server.ts",
+        "main.ts",
+        "stdio-bridge.ts"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}
