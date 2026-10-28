@@ -17,11 +17,24 @@ export class DockerManager {
     async create(tenantId, agentId, blueprint) {
         const k = this.key(tenantId, agentId);
         if (this.agents.has(k)) {
-            throw new Error(`Agent ${agentId} already exists for tenant ${tenantId}`);
+            // 先清理旧的
+            await this.destroy(tenantId, agentId);
         }
         if (this.agents.size >= this.config.maxContainers) {
             throw new Error(`Max container limit reached: ${this.config.maxContainers}`);
         }
+        // 清理同名残留容器
+        const containerName = `dsh-agent-${tenantId}-${agentId}`;
+        try {
+            const old = this.docker.getContainer(containerName);
+            try {
+                await old.stop({ t: 3 });
+            }
+            catch { /* */ }
+            await old.remove({ force: true });
+            console.log(`Removed stale container: ${containerName}`);
+        }
+        catch { /* no existing container */ }
         // 1. 生成 cordis.yml
         const configDir = await this.translator.translate(tenantId, agentId, blueprint);
         // 2. 构建环境变量
